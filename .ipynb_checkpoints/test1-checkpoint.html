@@ -1,0 +1,510 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import logging\n",
+    "import pyLDAvis.gensim\n",
+    "import json\n",
+    "import warnings\n",
+    "# add log\n",
+    "warnings.filterwarnings('ignore')  # To ignore all warnings that arise here to enhance clarit\n",
+    "from gensim.models.coherencemodel import CoherenceModel\n",
+    "from gensim.models.ldamodel import LdaModel\n",
+    "from gensim.corpora.dictionary import Dictionary\n",
+    "from numpy import array"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# set up logging\n",
+    "# logger = logging.getLogger()\n",
+    "# logger.setLevel(logging.DEBUG)\n",
+    "# logging.debug(\"test\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# set up corpus\n",
+    "texts = [['human', 'interface', 'computer'],\n",
+    "         ['survey', 'user', 'computer', 'system', 'response', 'time'],\n",
+    "         ['eps', 'user', 'interface', 'system'],\n",
+    "         ['system', 'human', 'system', 'eps'],\n",
+    "         ['user', 'response', 'time'],\n",
+    "         ['trees'],\n",
+    "         ['graph', 'trees'],\n",
+    "         ['graph', 'minors', 'trees'],\n",
+    "         ['graph', 'minors', 'survey']]\n",
+    "dictionary = Dictionary(texts)\n",
+    "corpus = [dictionary.doc2bow(text) for text in texts]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# set up two topic models\n",
+    "goodLdaModel = LdaModel(corpus=corpus, id2word=dictionary, iterations=50, num_topics=2)\n",
+    "badLdaModel = LdaModel(corpus=corpus, id2word=dictionary, iterations=1, num_topics=2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# using U_Mass Coherence\n",
+    "goodcm = CoherenceModel(model=goodLdaModel, corpus=corpus, dictionary=dictionary, coherence='u_mass')\n",
+    "badcm = CoherenceModel(model=badLdaModel, corpus=corpus, dictionary=dictionary, coherence='u_mass')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Coherence_Measure(seg=<function s_one_pre at 0x0000020B8287C488>, prob=<function p_boolean_document at 0x0000020B8287C620>, conf=<function log_conditional_probability at 0x0000020B82933378>, aggr=<function arithmetic_mean at 0x0000020B82933AE8>)\n"
+     ]
+    }
+   ],
+   "source": [
+    "# view\n",
+    "print(goodcm)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.css\">\n",
+       "\n",
+       "\n",
+       "<div id=\"ldavis_el15642248460173624293739866\"></div>\n",
+       "<script type=\"text/javascript\">\n",
+       "\n",
+       "var ldavis_el15642248460173624293739866_data = {\"mdsDat\": {\"Freq\": [57.83146667480469, 42.16853332519531], \"cluster\": [1, 1], \"topics\": [1, 2], \"x\": [0.026797540485858914, -0.026797540485858914], \"y\": [0.0, 0.0]}, \"tinfo\": {\"Category\": [\"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\"], \"Freq\": [2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.925183057785034, 1.6629077196121216, 1.4270082712173462, 1.4230917692184448, 1.3619287014007568, 1.3269957304000854, 1.5399105548858643, 1.1231136322021484, 0.9921369552612305, 0.9272696375846863, 1.0688021183013916, 0.9927781224250793, 1.844006061553955, 1.7670934200286865, 1.1981852054595947, 1.1325602531433105, 1.000054121017456, 1.290482997894287, 0.7937898635864258, 0.7584481239318848, 0.6965706944465637, 0.6926085948944092, 0.4539545178413391, 0.6011224389076233], \"Term\": [\"graph\", \"trees\", \"system\", \"time\", \"response\", \"eps\", \"user\", \"minors\", \"computer\", \"interface\", \"human\", \"survey\", \"system\", \"eps\", \"interface\", \"human\", \"survey\", \"computer\", \"user\", \"minors\", \"response\", \"time\", \"trees\", \"graph\", \"graph\", \"trees\", \"time\", \"response\", \"minors\", \"user\", \"computer\", \"survey\", \"human\", \"interface\", \"eps\", \"system\"], \"Total\": [2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 3.5263054370880127, 2.1168622970581055, 2.119616985321045, 2.1196625232696533, 2.1203768253326416, 2.120785713195801, 2.8303935527801514, 2.1231677532196045, 2.124697208404541, 2.125454902648926, 2.835895538330078, 2.8367841243743896, 2.8367841243743896, 2.835895538330078, 2.125454902648926, 2.124697208404541, 2.1231677532196045, 2.8303935527801514, 2.120785713195801, 2.1203768253326416, 2.1196625232696533, 2.119616985321045, 2.1168622970581055, 3.5263054370880127], \"loglift\": [12.0, 11.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.36070001125335693, 0.30630001425743103, 0.15199999511241913, 0.14920000731945038, 0.10490000247955322, 0.07880000025033951, -0.06109999865293503, -0.08919999748468399, -0.21389999985694885, -0.28189998865127563, -0.42820000648498535, -0.5023000240325928, 0.4327999949455261, 0.390500009059906, 0.29030001163482666, 0.23430000245571136, 0.11060000211000443, 0.07810000330209732, -0.11919999867677689, -0.16459999978542328, -0.2493000030517578, -0.2549999952316284, -0.6761999726295471, -0.9057000279426575], \"logprob\": [12.0, 11.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, -1.7462999820709229, -2.3111000061035156, -2.464099884033203, -2.4667999744415283, -2.5107998847961426, -2.5367000102996826, -2.3879001140594482, -2.7035999298095703, -2.8276000022888184, -2.89520001411438, -2.7530999183654785, -2.826900005340576, -1.8918999433517456, -1.934499979019165, -2.322999954223633, -2.379300117492676, -2.503700017929077, -2.248800039291382, -2.7346999645233154, -2.7802999019622803, -2.8654000759124756, -2.8710999488830566, -3.293600082397461, -3.0127999782562256]}, \"token.table\": {\"Topic\": [1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], \"Freq\": [0.47152334451675415, 0.47152334451675415, 0.9447945952415466, 0.35251185297966003, 0.7050237059593201, 0.4717732071876526, 0.4717732071876526, 0.4717833399772644, 0.4717833399772644, 0.47099435329437256, 0.47099435329437256, 0.47065529227256775, 0.47065529227256775, 0.471614271402359, 0.471614271402359, 0.8507487773895264, 0.2835829257965088, 0.470487505197525, 0.470487505197525, 0.35262230038642883, 0.7052446007728577, 0.7066155076026917, 0.3533077538013458], \"Term\": [\"computer\", \"computer\", \"eps\", \"graph\", \"graph\", \"human\", \"human\", \"interface\", \"interface\", \"minors\", \"minors\", \"response\", \"response\", \"survey\", \"survey\", \"system\", \"system\", \"time\", \"time\", \"trees\", \"trees\", \"user\", \"user\"]}, \"R\": 12, \"lambda.step\": 0.01, \"plot.opts\": {\"xlab\": \"PC1\", \"ylab\": \"PC2\"}, \"topic.order\": [1, 2]};\n",
+       "\n",
+       "function LDAvis_load_lib(url, callback){\n",
+       "  var s = document.createElement('script');\n",
+       "  s.src = url;\n",
+       "  s.async = true;\n",
+       "  s.onreadystatechange = s.onload = callback;\n",
+       "  s.onerror = function(){console.warn(\"failed to load library \" + url);};\n",
+       "  document.getElementsByTagName(\"head\")[0].appendChild(s);\n",
+       "}\n",
+       "\n",
+       "if(typeof(LDAvis) !== \"undefined\"){\n",
+       "   // already loaded: just create the visualization\n",
+       "   !function(LDAvis){\n",
+       "       new LDAvis(\"#\" + \"ldavis_el15642248460173624293739866\", ldavis_el15642248460173624293739866_data);\n",
+       "   }(LDAvis);\n",
+       "}else if(typeof define === \"function\" && define.amd){\n",
+       "   // require.js is available: use it to load d3/LDAvis\n",
+       "   require.config({paths: {d3: \"https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min\"}});\n",
+       "   require([\"d3\"], function(d3){\n",
+       "      window.d3 = d3;\n",
+       "      LDAvis_load_lib(\"https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.js\", function(){\n",
+       "        new LDAvis(\"#\" + \"ldavis_el15642248460173624293739866\", ldavis_el15642248460173624293739866_data);\n",
+       "      });\n",
+       "    });\n",
+       "}else{\n",
+       "    // require.js not available: dynamically load d3 & LDAvis\n",
+       "    LDAvis_load_lib(\"https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js\", function(){\n",
+       "         LDAvis_load_lib(\"https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.js\", function(){\n",
+       "                 new LDAvis(\"#\" + \"ldavis_el15642248460173624293739866\", ldavis_el15642248460173624293739866_data);\n",
+       "            })\n",
+       "         });\n",
+       "}\n",
+       "</script>"
+      ],
+      "text/plain": [
+       "PreparedData(topic_coordinates=            Freq  cluster  topics         x    y\n",
+       "topic                                           \n",
+       "0      57.831467        1       1  0.026798  0.0\n",
+       "1      42.168533        1       2 -0.026798  0.0, topic_info=     Category      Freq       Term     Total  loglift  logprob\n",
+       "term                                                          \n",
+       "10    Default  2.000000      graph  2.000000  12.0000  12.0000\n",
+       "9     Default  2.000000      trees  2.000000  11.0000  11.0000\n",
+       "5     Default  3.000000     system  3.000000  10.0000  10.0000\n",
+       "6     Default  2.000000       time  2.000000   9.0000   9.0000\n",
+       "3     Default  2.000000   response  2.000000   8.0000   8.0000\n",
+       "8     Default  2.000000        eps  2.000000   7.0000   7.0000\n",
+       "7     Default  2.000000       user  2.000000   6.0000   6.0000\n",
+       "11    Default  2.000000     minors  2.000000   5.0000   5.0000\n",
+       "0     Default  2.000000   computer  2.000000   4.0000   4.0000\n",
+       "2     Default  2.000000  interface  2.000000   3.0000   3.0000\n",
+       "1     Default  2.000000      human  2.000000   2.0000   2.0000\n",
+       "4     Default  2.000000     survey  2.000000   1.0000   1.0000\n",
+       "5      Topic1  2.925183     system  3.526305   0.3607  -1.7463\n",
+       "8      Topic1  1.662908        eps  2.116862   0.3063  -2.3111\n",
+       "2      Topic1  1.427008  interface  2.119617   0.1520  -2.4641\n",
+       "1      Topic1  1.423092      human  2.119663   0.1492  -2.4668\n",
+       "4      Topic1  1.361929     survey  2.120377   0.1049  -2.5108\n",
+       "0      Topic1  1.326996   computer  2.120786   0.0788  -2.5367\n",
+       "7      Topic1  1.539911       user  2.830394  -0.0611  -2.3879\n",
+       "11     Topic1  1.123114     minors  2.123168  -0.0892  -2.7036\n",
+       "3      Topic1  0.992137   response  2.124697  -0.2139  -2.8276\n",
+       "6      Topic1  0.927270       time  2.125455  -0.2819  -2.8952\n",
+       "9      Topic1  1.068802      trees  2.835896  -0.4282  -2.7531\n",
+       "10     Topic1  0.992778      graph  2.836784  -0.5023  -2.8269\n",
+       "10     Topic2  1.844006      graph  2.836784   0.4328  -1.8919\n",
+       "9      Topic2  1.767093      trees  2.835896   0.3905  -1.9345\n",
+       "6      Topic2  1.198185       time  2.125455   0.2903  -2.3230\n",
+       "3      Topic2  1.132560   response  2.124697   0.2343  -2.3793\n",
+       "11     Topic2  1.000054     minors  2.123168   0.1106  -2.5037\n",
+       "7      Topic2  1.290483       user  2.830394   0.0781  -2.2488\n",
+       "0      Topic2  0.793790   computer  2.120786  -0.1192  -2.7347\n",
+       "4      Topic2  0.758448     survey  2.120377  -0.1646  -2.7803\n",
+       "1      Topic2  0.696571      human  2.119663  -0.2493  -2.8654\n",
+       "2      Topic2  0.692609  interface  2.119617  -0.2550  -2.8711\n",
+       "8      Topic2  0.453955        eps  2.116862  -0.6762  -3.2936\n",
+       "5      Topic2  0.601122     system  3.526305  -0.9057  -3.0128, token_table=      Topic      Freq       Term\n",
+       "term                            \n",
+       "0         1  0.471523   computer\n",
+       "0         2  0.471523   computer\n",
+       "8         1  0.944795        eps\n",
+       "10        1  0.352512      graph\n",
+       "10        2  0.705024      graph\n",
+       "1         1  0.471773      human\n",
+       "1         2  0.471773      human\n",
+       "2         1  0.471783  interface\n",
+       "2         2  0.471783  interface\n",
+       "11        1  0.470994     minors\n",
+       "11        2  0.470994     minors\n",
+       "3         1  0.470655   response\n",
+       "3         2  0.470655   response\n",
+       "4         1  0.471614     survey\n",
+       "4         2  0.471614     survey\n",
+       "5         1  0.850749     system\n",
+       "5         2  0.283583     system\n",
+       "6         1  0.470488       time\n",
+       "6         2  0.470488       time\n",
+       "9         1  0.352622      trees\n",
+       "9         2  0.705245      trees\n",
+       "7         1  0.706616       user\n",
+       "7         2  0.353308       user, R=12, lambda_step=0.01, plot_opts={'xlab': 'PC1', 'ylab': 'PC2'}, topic_order=[1, 2])"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Visualize topic models\n",
+    "pyLDAvis.enable_notebook()\n",
+    "pyLDAvis.gensim.prepare(goodLdaModel, corpus, dictionary)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "\n",
+       "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.css\">\n",
+       "\n",
+       "\n",
+       "<div id=\"ldavis_el156422484608078881980215859\"></div>\n",
+       "<script type=\"text/javascript\">\n",
+       "\n",
+       "var ldavis_el156422484608078881980215859_data = {\"mdsDat\": {\"Freq\": [51.38841247558594, 48.61158752441406], \"cluster\": [1, 1], \"topics\": [1, 2], \"x\": [0.0015903232851997016, -0.0015903232851997016], \"y\": [0.0, 0.0]}, \"tinfo\": {\"Category\": [\"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Default\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic1\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\", \"Topic2\"], \"Freq\": [2.0, 2.0, 2.0, 2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.2340173721313477, 1.5710272789001465, 1.1584306955337524, 1.544167160987854, 1.1529093980789185, 1.4891337156295776, 1.7664626836776733, 1.0454078912734985, 1.024794340133667, 0.9857766628265381, 0.9840055704116821, 0.9465058445930481, 1.175713062286377, 1.1381443738937378, 1.1363705396652222, 1.0972791910171509, 1.076627254486084, 1.770216941833496, 1.340069055557251, 0.9689255952835083, 1.2849323749542236, 0.9633938074111938, 1.2580217123031616, 0.8876674771308899], \"Term\": [\"response\", \"interface\", \"minors\", \"time\", \"eps\", \"system\", \"survey\", \"trees\", \"graph\", \"computer\", \"human\", \"user\", \"time\", \"trees\", \"computer\", \"graph\", \"human\", \"user\", \"system\", \"survey\", \"eps\", \"minors\", \"interface\", \"response\", \"response\", \"interface\", \"minors\", \"eps\", \"survey\", \"system\", \"user\", \"human\", \"graph\", \"computer\", \"trees\", \"time\"], \"Total\": [2.0, 2.0, 2.0, 2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.1216847896575928, 2.8290491104125977, 2.1218245029449463, 2.829099655151367, 2.1218349933624268, 2.829202651977539, 3.536679744720459, 2.122035026550293, 2.1220736503601074, 2.1221470832824707, 2.12214994430542, 2.1222188472747803, 2.1222188472747803, 2.12214994430542, 2.1221470832824707, 2.1220736503601074, 2.122035026550293, 3.536679744720459, 2.829202651977539, 2.1218349933624268, 2.829099655151367, 2.1218245029449463, 2.8290491104125977, 2.1216847896575928], \"loglift\": [12.0, 11.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.12380000203847885, 0.07750000059604645, 0.060499999672174454, 0.06030000001192093, 0.055799998342990875, 0.024000000208616257, -0.02850000001490116, -0.0421999990940094, -0.06210000067949295, -0.10100000351667404, -0.10279999673366547, -0.14169999957084656, 0.1307000070810318, 0.09830000251531601, 0.09669999778270721, 0.0617000013589859, 0.04280000180006027, 0.029200000688433647, -0.026000000536441803, -0.0625, -0.06790000200271606, -0.06830000132322311, -0.08910000324249268, -0.1500999927520752], \"logprob\": [12.0, 11.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, -2.491300106048584, -2.249799966812134, -2.554500102996826, -2.2671000957489014, -2.5592000484466553, -2.303299903869629, -2.1326000690460205, -2.657099962234497, -2.677000045776367, -2.71589994430542, -2.7177000045776367, -2.756500005722046, -2.484100103378296, -2.5165998935699463, -2.5181000232696533, -2.5532000064849854, -2.572200059890747, -2.074899911880493, -2.353300094604492, -2.6775999069213867, -2.3952999114990234, -2.683300018310547, -2.4163999557495117, -2.7651000022888184]}, \"token.table\": {\"Topic\": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2], \"Freq\": [0.47129252552986145, 0.47129252552986145, 0.4712371826171875, 0.4712371826171875, 0.7069386839866638, 0.3534693419933319, 0.4712901711463928, 0.4712901711463928, 0.4712202250957489, 0.4712202250957489, 0.47122088074684143, 0.47122088074684143, 0.471204936504364, 0.471204936504364, 0.47124576568603516, 0.47124576568603516, 0.5655021667480469, 0.5655021667480469, 0.47132354974746704, 0.47132354974746704, 0.7069513201713562, 0.3534756600856781, 0.3534564673900604, 0.3534564673900604], \"Term\": [\"computer\", \"computer\", \"eps\", \"eps\", \"graph\", \"graph\", \"human\", \"human\", \"interface\", \"interface\", \"minors\", \"minors\", \"response\", \"response\", \"survey\", \"survey\", \"system\", \"system\", \"time\", \"time\", \"trees\", \"trees\", \"user\", \"user\"]}, \"R\": 12, \"lambda.step\": 0.01, \"plot.opts\": {\"xlab\": \"PC1\", \"ylab\": \"PC2\"}, \"topic.order\": [2, 1]};\n",
+       "\n",
+       "function LDAvis_load_lib(url, callback){\n",
+       "  var s = document.createElement('script');\n",
+       "  s.src = url;\n",
+       "  s.async = true;\n",
+       "  s.onreadystatechange = s.onload = callback;\n",
+       "  s.onerror = function(){console.warn(\"failed to load library \" + url);};\n",
+       "  document.getElementsByTagName(\"head\")[0].appendChild(s);\n",
+       "}\n",
+       "\n",
+       "if(typeof(LDAvis) !== \"undefined\"){\n",
+       "   // already loaded: just create the visualization\n",
+       "   !function(LDAvis){\n",
+       "       new LDAvis(\"#\" + \"ldavis_el156422484608078881980215859\", ldavis_el156422484608078881980215859_data);\n",
+       "   }(LDAvis);\n",
+       "}else if(typeof define === \"function\" && define.amd){\n",
+       "   // require.js is available: use it to load d3/LDAvis\n",
+       "   require.config({paths: {d3: \"https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min\"}});\n",
+       "   require([\"d3\"], function(d3){\n",
+       "      window.d3 = d3;\n",
+       "      LDAvis_load_lib(\"https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.js\", function(){\n",
+       "        new LDAvis(\"#\" + \"ldavis_el156422484608078881980215859\", ldavis_el156422484608078881980215859_data);\n",
+       "      });\n",
+       "    });\n",
+       "}else{\n",
+       "    // require.js not available: dynamically load d3 & LDAvis\n",
+       "    LDAvis_load_lib(\"https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js\", function(){\n",
+       "         LDAvis_load_lib(\"https://cdn.rawgit.com/bmabey/pyLDAvis/files/ldavis.v1.0.0.js\", function(){\n",
+       "                 new LDAvis(\"#\" + \"ldavis_el156422484608078881980215859\", ldavis_el156422484608078881980215859_data);\n",
+       "            })\n",
+       "         });\n",
+       "}\n",
+       "</script>"
+      ],
+      "text/plain": [
+       "PreparedData(topic_coordinates=            Freq  cluster  topics        x    y\n",
+       "topic                                          \n",
+       "1      51.388412        1       1  0.00159  0.0\n",
+       "0      48.611588        1       2 -0.00159  0.0, topic_info=     Category      Freq       Term     Total  loglift  logprob\n",
+       "term                                                          \n",
+       "3     Default  2.000000   response  2.000000  12.0000  12.0000\n",
+       "2     Default  2.000000  interface  2.000000  11.0000  11.0000\n",
+       "11    Default  2.000000     minors  2.000000  10.0000  10.0000\n",
+       "6     Default  2.000000       time  2.000000   9.0000   9.0000\n",
+       "8     Default  2.000000        eps  2.000000   8.0000   8.0000\n",
+       "5     Default  3.000000     system  3.000000   7.0000   7.0000\n",
+       "4     Default  2.000000     survey  2.000000   6.0000   6.0000\n",
+       "9     Default  2.000000      trees  2.000000   5.0000   5.0000\n",
+       "10    Default  2.000000      graph  2.000000   4.0000   4.0000\n",
+       "0     Default  2.000000   computer  2.000000   3.0000   3.0000\n",
+       "1     Default  2.000000      human  2.000000   2.0000   2.0000\n",
+       "7     Default  2.000000       user  2.000000   1.0000   1.0000\n",
+       "6      Topic1  1.234017       time  2.121685   0.1238  -2.4913\n",
+       "9      Topic1  1.571027      trees  2.829049   0.0775  -2.2498\n",
+       "0      Topic1  1.158431   computer  2.121825   0.0605  -2.5545\n",
+       "10     Topic1  1.544167      graph  2.829100   0.0603  -2.2671\n",
+       "1      Topic1  1.152909      human  2.121835   0.0558  -2.5592\n",
+       "7      Topic1  1.489134       user  2.829203   0.0240  -2.3033\n",
+       "5      Topic1  1.766463     system  3.536680  -0.0285  -2.1326\n",
+       "4      Topic1  1.045408     survey  2.122035  -0.0422  -2.6571\n",
+       "8      Topic1  1.024794        eps  2.122074  -0.0621  -2.6770\n",
+       "11     Topic1  0.985777     minors  2.122147  -0.1010  -2.7159\n",
+       "2      Topic1  0.984006  interface  2.122150  -0.1028  -2.7177\n",
+       "3      Topic1  0.946506   response  2.122219  -0.1417  -2.7565\n",
+       "3      Topic2  1.175713   response  2.122219   0.1307  -2.4841\n",
+       "2      Topic2  1.138144  interface  2.122150   0.0983  -2.5166\n",
+       "11     Topic2  1.136371     minors  2.122147   0.0967  -2.5181\n",
+       "8      Topic2  1.097279        eps  2.122074   0.0617  -2.5532\n",
+       "4      Topic2  1.076627     survey  2.122035   0.0428  -2.5722\n",
+       "5      Topic2  1.770217     system  3.536680   0.0292  -2.0749\n",
+       "7      Topic2  1.340069       user  2.829203  -0.0260  -2.3533\n",
+       "1      Topic2  0.968926      human  2.121835  -0.0625  -2.6776\n",
+       "10     Topic2  1.284932      graph  2.829100  -0.0679  -2.3953\n",
+       "0      Topic2  0.963394   computer  2.121825  -0.0683  -2.6833\n",
+       "9      Topic2  1.258022      trees  2.829049  -0.0891  -2.4164\n",
+       "6      Topic2  0.887667       time  2.121685  -0.1501  -2.7651, token_table=      Topic      Freq       Term\n",
+       "term                            \n",
+       "0         1  0.471293   computer\n",
+       "0         2  0.471293   computer\n",
+       "8         1  0.471237        eps\n",
+       "8         2  0.471237        eps\n",
+       "10        1  0.706939      graph\n",
+       "10        2  0.353469      graph\n",
+       "1         1  0.471290      human\n",
+       "1         2  0.471290      human\n",
+       "2         1  0.471220  interface\n",
+       "2         2  0.471220  interface\n",
+       "11        1  0.471221     minors\n",
+       "11        2  0.471221     minors\n",
+       "3         1  0.471205   response\n",
+       "3         2  0.471205   response\n",
+       "4         1  0.471246     survey\n",
+       "4         2  0.471246     survey\n",
+       "5         1  0.565502     system\n",
+       "5         2  0.565502     system\n",
+       "6         1  0.471324       time\n",
+       "6         2  0.471324       time\n",
+       "9         1  0.706951      trees\n",
+       "9         2  0.353476      trees\n",
+       "7         1  0.353456       user\n",
+       "7         2  0.353456       user, R=12, lambda_step=0.01, plot_opts={'xlab': 'PC1', 'ylab': 'PC2'}, topic_order=[2, 1])"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Visualize topic models\n",
+    "pyLDAvis.enable_notebook()\n",
+    "pyLDAvis.gensim.prepare(badLdaModel, corpus, dictionary)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-14.664627001047737\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(goodcm.get_coherence())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-14.726061108336852\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(badcm.get_coherence())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Using C_V coherence"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "goodcm = CoherenceModel(model=goodLdaModel, texts=texts, dictionary=dictionary, coherence='c_v')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "badcm = CoherenceModel(model=badLdaModel, texts=texts, dictionary=dictionary, coherence='c_v')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Pipeline parameters for C_V cohermence"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Coherence_Measure(seg=<function s_one_set at 0x0000020B8287C598>, prob=<function p_boolean_sliding_window at 0x0000020B8287C730>, conf=<function cosine_similarity at 0x0000020B82933488>, aggr=<function arithmetic_mean at 0x0000020B82933AE8>)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(goodcm)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Coherence_Measure(seg=<function s_one_set at 0x0000020B8287C598>, prob=<function p_boolean_sliding_window at 0x0000020B8287C730>, conf=<function cosine_similarity at 0x0000020B82933488>, aggr=<function arithmetic_mean at 0x0000020B82933AE8>)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(badcm)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Print coherence values"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.38384135537372027\n",
+      "0.38384135537372027\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(goodcm.get_coherence())\n",
+    "print(badcm.get_coherence())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
